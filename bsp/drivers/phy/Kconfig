@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: GPL-2.0
+#
+# PCIe PHY Support
+#
+
+config AW_INNO_COMBOPHY
+	bool "Allwinner Snps PCIe PHY Driver"
+	default n
+	depends on PHY
+	help
+	  Support for Allwinner PCIe PHY with Synopsys IP block.
+	  It could support PCIe Gen2 single root complex.

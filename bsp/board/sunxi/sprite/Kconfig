@@ -1,0 +1,16 @@
+menuconfig SUNXI_SPRITE
+    bool "Sunxi Sprite support"
+    select AW_FLASH
+    help
+      Enable support for sunxi efex devices.
+
+if SUNXI_SPRITE
+
+config SUNXI_SPRITE_CARTOON
+	bool "Sunxi Sprite cartoon support"
+	select SUNXI_FLASH
+	default n
+	help
+	  Enable support for sunxi Sprite cartoon(display)
+
+endif

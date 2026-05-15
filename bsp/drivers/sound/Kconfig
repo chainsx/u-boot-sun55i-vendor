@@ -1,0 +1,37 @@
+config SOUND_SUNXI
+	bool "Sound support for Allwinner SoCs"
+	depends on SOUND && ARCH_SUNXI
+	default y
+	help
+	  This enables support for audio driver API on Allwinner
+	  SoCs.
+
+if SOUND_SUNXI
+
+config SOUND_SUNXI_SOC_RWFUNC
+	bool
+
+config SOUND_SUNXI_SOC_AUDIOCODEC
+	bool
+
+config SOUND_SUNXI_SOC_SOUND
+	bool
+
+config SOUND_SUNXI_SUN55IW6_CODEC
+	bool "Support sunxi sun55iw6 audio codec"
+	depends on MACH_SUN55IW6
+	select SOUND_SUNXI_SOC_RWFUNC
+	select SOUND_SUNXI_SOC_AUDIOCODEC
+	select SOUND_SUNXI_SOC_SOUND
+	help
+	  Select Y or M to add support for the Codec embedded in the Allwinner
+	  SUN55IW6 and affiliated SoCs.
+
+config SOUND_SUNXI_BOOT_TONE
+	bool "Enable boot tone"
+	depends on SOUND_SUNXI_SUN55IW6_CODEC
+	help
+	  Select Y or M to add support for Boottone. it depends on Codec
+	  embedded in Allwinner SoCs.
+
+endif # SOUND_SUNXI

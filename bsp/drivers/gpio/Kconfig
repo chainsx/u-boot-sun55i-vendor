@@ -1,0 +1,29 @@
+#
+# GPIO infrastructure and drivers
+#
+
+config AW_GPIO
+	bool "Allwinner GPIO driver"
+	depends on ARCH_SUNXI
+	depends on GPIO
+	select SPL_STRTO if SPL
+	help
+	  Support the GPIO device in Allwinner SoCs.
+
+menu "Allwinner GPIO Version"
+	depends on AW_GPIO
+choice
+	prompt "sunxi gpio ip version"
+	default SUNXI_GPIO_V1
+
+config SUNXI_GPIO_V1
+	bool "sunxi gpio v1"
+
+config SUNXI_GPIO_V2
+	bool "sunxi gpio v2"
+
+config AW_GPIO_V3
+	depends on DM_GPIO
+	bool "sunxi gpio v3"
+endchoice
+endmenu

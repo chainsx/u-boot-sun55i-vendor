@@ -1,0 +1,5 @@
+config AW_DMA
+         bool "SUNXI DMA driver"
+         help
+           Support for SUNXI DMA controller.
+

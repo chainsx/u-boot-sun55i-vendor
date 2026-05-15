@@ -1,0 +1,237 @@
+choice
+	prompt "SPL Image Type"
+	default SPL_IMAGE_TYPE_SUNXI_EGON
+
+config SPL_IMAGE_TYPE_SUNXI_EGON
+	bool "eGON (normal)"
+	help
+	  Select this option to embed the SPL binary in an eGON.BT0 image,
+	  which is compatible with the normal boot ROM (NBROM).
+
+	  This is usually the correct option to choose.
+
+config SPL_IMAGE_TYPE_SUNXI_TOC0
+	bool "TOC0 (secure)"
+	help
+	  Select this option to embed the SPL binary in a TOC0 image,
+	  which is compatible with the secure boot ROM (SBROM).
+
+endchoice
+
+config SPL_IMAGE_TYPE
+	string
+	default "sunxi_egon" if SPL_IMAGE_TYPE_SUNXI_EGON
+	default "sunxi_toc0" if SPL_IMAGE_TYPE_SUNXI_TOC0
+
+config SYS_TEXT_BASE
+	default 0x43000000 if ARCH_SUNXI
+	hex "Text Base"
+	help
+	  The address in memory that U-Boot will be running from, initially.
+
+config SUNXI_NOR_IMG
+	bool "crate u-boot-nor.bin"
+	default false
+
+menu "OPTEE_VERSION"
+
+choice
+	prompt "select optee version"
+	default OPTEE25 if MACH_SUN8IW18
+
+config OPTEE25
+	bool "use optee 2.5 smc api"
+	---help---
+	Select this to use optee 2.5 smc api.
+
+config NOT_USE_OPTEE25
+	bool "no use optee 2.5 smc api"
+	---help---
+	Select this to no use optee 2.5 smc api.
+endchoice
+
+endmenu
+
+config SUNXI_PRIVATE_STORAGE
+	bool "Sunxi Sprite Private Storage"
+	help
+	  Enable supprot for sunxi private storage
+
+config SUNXI_KEYBOX
+	bool "Sunxi Keybox Private Storage"
+	help
+	  Enable supprot for sunxi keybox private storage
+
+config SUNXI_IMAGE_VERIFIER
+	bool "Sunxi image verify support"
+	default n
+	select SUNXI_CE_DRIVER
+	select OPENSSL
+
+if SUNXI_KEYBOX
+config SECURE_STORAGE_KEY_HUK
+	bool "Keybox Crypto by HUK"
+	default y
+	help
+	  Enable sunxi keybox crypto by huk
+endif
+
+config SUNXI_EXTERN_SECURE_MM_LAYOUT
+	bool "sunxi secure memory lay defined in fdt"
+	default n
+	help
+		when enable, uboot try to load secure memory layout
+		from fdt(shm\ta ram). Notify secure os configurated
+		layout and mard those memory as "reserved memory" in
+		fdt
+
+config LAST_PARTITION_NAME
+    string "set last partition name"
+    default "UDISK"
+    help
+      Last partition name.
+
+config SUNXI_BOOT_PARAM
+	bool "enable sunxi boot param"
+	help
+		store startup related parameters
+
+config SUNXI_FDT_ADDR
+	hex "device tree address for kernel"
+	default 0
+	---help---
+	set the address for start_kernel.
+
+config SUNXI_FDT_MALLOC_SIZE
+	hex "device tree size for kernel"
+	default 0x40000
+	---help---
+	set the size for start_kernel.
+
+config AW_BSP
+	bool "Allwinner Platform"
+	default y
+	select PINCTRL
+	help
+		This enables support for Allwinner sunxi based SoCs like the A64.
+
+config SUNXI_SERIAL
+	bool "Update snum to bootargs"
+	depends on AW_EFUSE
+	default n
+
+config SUNXI_MAC
+	bool "sunxi_mac"
+	default n
+	help
+		when enabled, uboot read mac addr and send to system via cmdline
+
+config SUNXI_USER_KEY
+	bool "user key"
+	default n
+	select SUNXI_PRIVATE_STORAGE
+	select CMD_FAT
+	help
+		when enable, uboot try to read cmdline data from secure storage
+
+config SUNXI_SET_EFUSE_POWER
+	bool "set sunxi efuse power"
+	default n
+	help
+		Efuse is powered by the pmu.
+
+config SUNXI_ENABLE_FEL_VERIFY
+	bool "enable sunxi sign fel verify"
+	default n
+	help
+		Burn efuse sign fel bit
+
+config SUNXI_LOG
+	bool "Sunxi out put log with timestamp"
+	depends on LOG
+	default y
+
+config AW_STACKTRACE
+	bool "allwinner stacktrace"
+	depends on ARM64 || ARM
+	default n
+
+config SUNXI_FPGA_PLATFORM
+	bool "build for fpga platform"
+	help
+		fpga board have special treament for resources like
+		clock or io, this config enable thoes special treament
+
+config SUNXI_VERIFY_DSP
+	bool "sunxi verify dsp"
+	default n
+	depends on XTENSA_DSP
+	depends on SUNXI_SECURE_BOOT
+	help
+		when enable, uboot will verify the dsp bin.
+
+config SUNXI_VERIFY_RISCV
+	bool "sunxi verify riscv"
+	default n
+	depends on SUNXI_SECURE_BOOT
+	help
+		when enable, secure boot uboot will verify the riscv bin.
+
+config SUNXI_VERIFY_RV
+        bool "sunxi verify rv"
+        default n
+        depends on BOOT_RISCV
+        help
+                when enable, uboot will verify the rv0 & rv1.
+
+config SUNXI_IMAGE_HEADER
+	bool "sunxi verify with image header"
+	default n
+	help
+		when enable, uboot will verify with image header.
+
+config LOGF_TIME
+	bool "Add time information before the output log"
+	default y
+
+config LOGF_MODULE
+	bool "Add cat information before the output log"
+	default y
+
+config LOGF_LEVEL
+	bool "Add level information before the output log"
+	default y
+
+config LOGF_DEVNAME
+	bool "Add level information before the output log"
+	default y
+
+source "bsp/board/sunxi/sprite/Kconfig"
+
+config SUNXI_BOOT_ENV_INLINE
+	bool "sunxi boot env set in uboot"
+	default n
+	depends on ENV_IS_IN_SUNXI_FLASH
+	help
+		support set boot env in uboot, which will cover partition's env
+if SUNXI_BOOT_ENV_INLINE
+config SUNXI_BOOT_ENV_STRING
+	string "default boot env"
+	help
+		This env string can not be changed by env partition.
+endif
+
+config SUNXI_ANDROID_OVERLAY
+	bool "sunxi ANDROID fdt library overlay support"
+	depends on OF_LIBFDT_OVERLAY
+	default n
+	help
+		This enables the SUNXI ANDROID FDT library (libufdt) overlay support.
+
+config SUNXI_SWITCH_SYSTEM
+	bool "sunxi switch system"
+	default n
+	select BOOTCOUNT_LIMIT
+	select BOOTCOUNT_ENV
+	help
+	    Supports automatic switching and damaged switching

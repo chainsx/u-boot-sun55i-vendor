@@ -1,0 +1,7 @@
+config AW_WDT
+	bool "Allwinner sunxi watchdog timer support"
+	depends on WDT && ARCH_SUNXI
+	default y
+	help
+	  Enable support for the watchdog timer in Allwinner sunxi SoCs.
+

@@ -1,0 +1,142 @@
+menu "sunxi commands"
+
+config CMD_SUNXI_UPDATE
+	bool "sunxi update"
+	depends on OF_LIBFDT
+	default y
+	help
+	  sunxi update cmd before bootm
+
+config CMD_SUNXI_TIMER
+	bool "timer test"
+	help
+	  Activate this option to test sunxi timer.
+
+config CMD_SUNXI_CLK
+	bool "clk test"
+	help
+	  Activate this option to test sunxi clk.
+
+config CMD_SUNXI_PRIVATE_STORAGE
+	bool "securestorage cmd"
+	help
+	  securestorage command line read and write test use.
+
+config CMD_SUNXI_EFEX
+	bool "sunxi efex test"
+	default y
+	help
+	  Activate this option to test sunxi fel mode.
+
+config CMD_SUNXI_BURN
+	bool "pburn test"
+	depends on AW_BURN
+	help
+	  Activate this option to test sunxi burn.
+
+config CMD_SUNXI_EFUSE
+	bool "sunxi efuse commands"
+	depends on AW_EFUSE
+	default n
+	help
+	  Enable useful commands for the sunxi Soc efuse.
+
+config CMD_SUNXI_FASTBOOT
+    bool "enable fastboot"
+    default n
+    select SUNXI_FASTBOOT
+    help
+      enable fastboot.
+
+config CMD_SUNXI_AUTO_FEL
+    bool "enable auto fel"
+    default n
+    select SUNXI_BURN
+    help
+      enable auto fel function by probe MP tools.
+
+config CMD_SUNXI_DMA
+       bool "sunxi dma test"
+       default n
+       help
+         Command to test dma test.
+
+config CMD_SUNXI_NVEDIT
+       bool "nvedit file"
+       default y
+       help
+         Nvedit file.
+
+config CMD_SUNXI_FLASH
+	bool "sunxi flash test"
+	default y
+	help
+	  Activate this option to test sunxi flash.
+
+config CMD_SUNXI_MTDPARTS
+	bool "MTD partition support"
+	depends on MTD
+	help
+	  MTD partitioning tool support.
+	  It is strongly encouraged to avoid using this command
+	  anymore along with 'sf', 'nand', 'onenand'. One can still
+	  declare the partitions in the mtdparts environment variable
+	  but better use the MTD stack and the 'mtd' command instead.
+
+config CMD_SUNXI_UBI
+	tristate "Enable UBI - Unsorted block images commands"
+	select MTD_UBI
+	help
+	  UBI is a software layer above MTD layer which admits use of LVM-like
+	  logical volumes on top of MTD devices, hides some complexities of
+	  flash chips like wear and bad blocks and provides some other useful
+	  capabilities. Please, consult the MTD web site for more details
+	  (www.linux-mtd.infradead.org). Activate this option if you want
+	  to use U-Boot UBI commands.
+	  It is also strongly encouraged to also enable CONFIG_MTD to get full
+	  partition support.
+
+config CMD_UBIFS
+	tristate "Enable UBIFS - Unsorted block images filesystem commands"
+	depends on CMD_SUNXI_UBI
+	default y if CMD_SUNXI_UBI
+	select LZO
+	select GZIP
+	help
+	  UBIFS is a file system for flash devices which works on top of UBI.
+
+config CMD_SUNXI_BOOTRV
+	bool "enable bootrv"
+	default y
+	help
+		enable sunxi bootrv
+
+config CMD_SUNXI_BOOTRTOS
+	bool "enable boot rtos"
+	default y
+	help
+		enable sunxi boot rtos
+
+config CMD_SUNXI_AMP
+	bool "enable arm amp"
+	default n
+	help
+		enable sunxi arm amp
+
+config CMD_SUNXI_SOUND
+	bool "sunxi sound test"
+	default n
+	help
+	  Activate this option to test sunxi sound.
+
+config CMD_SUNXI_SPRITE
+	bool "sprite test"
+	help
+	  Activate this option to test sunxi sprite.
+
+config CMD_SUNXI_PCIE_EP
+	bool "sunxi pcie ep test"
+	default n
+	help
+	  Activate this option to test sunxi pcie ep.
+endmenu

@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: GPL-2.0
+
+menu "Allwinner uboot BSP"
+
+config AW_BSP_ALWAYS_N
+        bool
+        default n
+
+source "bsp/drivers/Kconfig"
+source "bsp/cmd/Kconfig"
+source "bsp/env/Kconfig"
+source "bsp/lib/Kconfig"
+
+endmenu

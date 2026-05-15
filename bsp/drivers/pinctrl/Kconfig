@@ -1,0 +1,25 @@
+# SPDX-License-Identifier: GPL-2.0-only
+
+config AW_PINCTRL
+	bool  "Pinctrl Support for Allwinner SoCs"
+	depends on ARCH_SUNXI
+	default y
+	help
+	  This selects support for the pinctrl on
+	  Allwinner sunxi SoCs.
+
+menu "Allwinner Pinctrl Version"
+	depends on AW_PINCTRL
+choice
+	prompt "allwinner pinctrl ip version"
+	default AW_PINCTRL_V1
+
+config AW_PINCTRL_V1
+	bool "sunxi pinctrl v1"
+
+config AW_PINCTRL_V3
+	bool "sunxi pinctrl v3"
+	select AW_GPIO_V3
+
+endchoice
+endmenu

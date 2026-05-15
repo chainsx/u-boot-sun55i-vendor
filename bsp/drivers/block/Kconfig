@@ -1,0 +1,6 @@
+config AW_FLASH
+	bool # "Support sunxi_flash devices"
+	depends on DM
+	help
+	  Enable support for sunxi_flash devices, such as spinor, MMC and nand
+	  flash sticks.

@@ -1,0 +1,18 @@
+config AW_MMC
+	bool "Allwinner sunxi SD/MMC Host Controller support"
+	depends on ARCH_SUNXI
+	default y
+	help
+	  This selects support for the SD/MMC Host Controller on
+	  Allwinner sunxi SoCs.
+
+if AW_MMC
+
+config SUNXI_BOOT0_SDMMC_BACKUP_START_ADDR
+	int "backup boot0 offset"
+	default 256
+	help
+	  offset to write backup boot0, unit:sector(512 bytes)
+
+endif
+

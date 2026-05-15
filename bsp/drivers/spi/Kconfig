@@ -1,0 +1,7 @@
+config AW_SPI
+	bool "SUNXI SPI driver"
+	depends on SPI
+	default n
+	select HEXDUMP
+	help
+	  Support for SUNXI SPI controller.

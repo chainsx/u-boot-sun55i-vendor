@@ -1,0 +1,4 @@
+config SUNXI_GPADC
+	bool "Enable Sunxi GPADC driver"
+	help
+	  This enables basic driver for Sunxi GPADC.

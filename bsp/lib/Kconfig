@@ -1,0 +1,14 @@
+menu "sunxi Library routines"
+
+config OPENSSL
+	bool "Openssl support"
+	help
+	  This enables support for X509 certificate decoding.
+
+config CRYPTO
+	bool "Use Crypto lib support"
+	default n
+	help
+	This enables support for the crypto lib which is support rsa/ecc/aes/hash.
+
+endmenu

@@ -1,0 +1,25 @@
+# SPDX-License-Identifier: GPL-2.0+
+
+obj-$(CONFIG_CMD_SUNXI_UPDATE) += sunxi_update.o
+obj-$(CONFIG_CMD_SUNXI_UPDATE) += sunxi_part.o
+obj-$(CONFIG_CMD_SUNXI_UPDATE) += sunxi_bootargs.o
+obj-$(CONFIG_CMD_SUNXI_TIMER) += sunxi_timer.o
+obj-$(CONFIG_CMD_SUNXI_PRIVATE_STORAGE) += sunxi_private_storage.o
+obj-$(CONFIG_CMD_SUNXI_EFEX) += sunxi_efex.o
+obj-$(CONFIG_CMD_SUNXI_BURN) += sunxi_burn.o
+obj-$(CONFIG_CMD_SUNXI_CLK) += sunxi_clk_test.o
+obj-$(CONFIG_CMD_SUNXI_EFUSE) += cmd_sunxi_efuse.o
+obj-$(CONFIG_CMD_SUNXI_FASTBOOT) += sunxi_fastboot.o
+obj-$(CONFIG_CMD_SUNXI_AUTO_FEL) += sunxi_auto_fel.o
+obj-$(CONFIG_CMD_SUNXI_DMA) += sunxi_dma.o
+obj-$(CONFIG_CMD_SUNXI_NVEDIT) += nvedit.o
+obj-$(CONFIG_CMD_BOOTM) += bootm.o
+obj-$(CONFIG_CMD_SUNXI_FLASH) += sunxi_flash.o
+obj-$(CONFIG_CMD_SUNXI_UBI) += ubi.o
+obj-$(CONFIG_CMD_SUNXI_MTDPARTS) += mtdparts.o
+obj-$(CONFIG_CMD_SUNXI_BOOTRV) += sunxi_bootrv.o
+obj-$(CONFIG_CMD_SUNXI_AMP) += sunxi_amp.o
+obj-$(CONFIG_CMD_SUNXI_BOOTRTOS) += sunxi_bootrtos.o
+obj-$(CONFIG_CMD_SUNXI_SOUND) += sunxi_sound_test.o
+obj-$(CONFIG_CMD_SUNXI_SPRITE) += sunxi_sprite.o
+obj-$(CONFIG_CMD_SUNXI_PCIE_EP) += sunxi_pcie_ep_test.o

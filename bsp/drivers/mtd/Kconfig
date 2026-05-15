@@ -1,0 +1,15 @@
+menu "AW-NAND Support"
+
+config AW_NAND
+	bool "SUNXI awnand driver"
+	default n
+	help
+	  Support SUNXI awnand driver.
+
+if AW_NAND
+source "bsp/drivers/mtd/awnand/Kconfig"
+endif
+
+endmenu
+
+source "bsp/drivers/mtd/spi/Kconfig"

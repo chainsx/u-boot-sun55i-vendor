@@ -1,0 +1,68 @@
+menuconfig AW_DRM_PANEL
+	tristate "Support panel based on DRM framework"
+	depends on AW_DRM
+	select PANEL
+	select BACKLIGHT
+	select BACKLIGHT_PWM
+	default n
+	help
+		If you want use DRM panel, select it.
+
+config PANEL_SQ101D_Q5DI404_84H501H
+	bool "SQ101D_Q5DI404_84H501H panel"
+	depends on (AW_DRM_PANEL)
+	select VIDEOMODE_HELPERS
+	default n
+	help
+		If you want to support PANEL_SQ101D_Q5DI404_84H501H panel, select it.
+
+config PANEL_DSI_GENERAL
+	bool "dsi general panel"
+	depends on  AW_DRM_PANEL && AW_DRM_DSI
+	default n
+	help
+		If you want to support general dsi panel, select it.
+
+config PANEL_LVDS_GENERAL
+	bool "lvds general panel"
+	depends on (AW_DRM_PANEL)
+	default n
+	help
+		If you want to support general lvds panel, select it.
+
+config PANEL_RGB_GENERAL
+	bool "rgb general panel"
+	depends on AW_DRM_PANEL && AW_DRM_RGB
+	default n
+	help
+		If you want to support general rgb panel, select it.
+
+config PANEL_BP101WX1
+	bool "BP101WX1 LVDS panel"
+	depends on (AW_DRM_PANEL)
+	select VIDEOMODE_HELPERS
+	default n
+	help
+		If you want to support PANEL_BP101WX1 panel, select it.
+
+config PANEL_EDP_GENERAL
+    tristate "eDP general drm panel"
+	depends on (AW_DRM_PANEL)
+	select VIDEOMODE_HELPERS
+    default n
+    help
+        If you want to support general edp panel, select it.
+
+config PANEL_ES103TC1C1
+	bool "ES103TC1C1 eink panel"
+	depends on AW_DRM_PANEL && AW_DRM_EINK200
+	select VIDEOMODE_HELPERS
+	default n
+	help
+		If you want to support ES103TC1C1 panel, select it.
+
+config LONTIUM_LT8912B
+	bool "lontium chip lt8912b"
+	default n
+	help
+		Single-Channel MIPI DSI Bridge to LVDS/HDMI. If you want to support lt8912b, select it.

@@ -1,0 +1,31 @@
+# SPDX-License-Identifier: GPL-2.0-only
+
+menu "Device Drivers"
+
+source bsp/drivers/clk/Kconfig
+source bsp/drivers/pinctrl/Kconfig
+source bsp/drivers/gpio/Kconfig
+source bsp/drivers/dma/Kconfig
+source bsp/drivers/twi/Kconfig
+source bsp/drivers/spi/Kconfig
+source bsp/drivers/pwm/Kconfig
+source bsp/drivers/watchdog/Kconfig
+source bsp/drivers/usb/Kconfig
+source bsp/drivers/pcie/Kconfig
+source bsp/drivers/phy/Kconfig
+source bsp/drivers/mmc/Kconfig
+source bsp/drivers/block/Kconfig
+source bsp/drivers/video/Kconfig
+source bsp/drivers/crypto/Kconfig
+source bsp/drivers/misc/Kconfig
+source bsp/drivers/bootcount/Kconfig
+source bsp/drivers/mtd/Kconfig
+source bsp/drivers/spi/Kconfig
+source bsp/drivers/arisc/Kconfig
+source bsp/drivers/dwmac/Kconfig
+source "bsp/drivers/riscv/Kconfig"
+source bsp/drivers/adc/Kconfig
+source bsp/drivers/sound/Kconfig
+source bsp/drivers/remoteproc/Kconfig
+
+endmenu

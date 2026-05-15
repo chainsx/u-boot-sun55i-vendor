@@ -1,0 +1,35 @@
+menuconfig AW_UDC
+	bool "SUNXI UDC driver support"
+	default n
+
+if AW_UDC
+
+config AW_UDC_CONTROLLER
+	bool "SUNXI UDC controller driver"
+	default n
+	depends on DM_USB_GADGET
+	select USB_GADGET_DUALSPEED
+	help
+	  Support for SUNXI UDC controller.
+
+config AW_USB_PHY
+	default n
+	bool "SUNXI USB PHY driver"
+	select DM_REGULATOR
+	select PHY
+	help
+	  Support for SUNXI USB PHY controller.
+
+config INITIAL_USB_SCAN_DELAY
+	int "Delay initial USB scan by x ms to allow builtin devices to init"
+	depends on AW_USB_PHY
+	default 0
+	help
+	  Some boards have on board usb devices which need longer than
+	  the USB spec's 1 second to connect from board powerup. Set
+	  this option to a nonzero value to add an extra delay before
+	  the first USB bus scan.
+
+endif
+
+

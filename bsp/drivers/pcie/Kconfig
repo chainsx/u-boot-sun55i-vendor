@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: GPL-2.0
+#
+# PCI Endpoint Support
+#
+
+config PCIE_ALLWINNER_EP
+	bool "Allwinner PCIe endpoint controller"
+	default n
+	depends on PCI_ENDPOINT
+	help
+	  Say Y here if you want to support the Allwinner PCIe controller in
+	  endpoint mode. This PCIe controller may be embedded into many
+	  different vendors SoCs.
+

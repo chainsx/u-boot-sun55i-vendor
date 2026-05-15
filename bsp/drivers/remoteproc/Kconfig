@@ -1,0 +1,24 @@
+config AW_REMOTEPROC
+	bool "SUNXI remoteproc driver"
+	depends on DM
+	select REMOTEPROC
+	default n
+	help
+	  Support for SUNXI remoteproc.
+
+if AW_REMOTEPROC
+
+config AW_RPROC_MISC_OPS
+	depends on AW_REMOTEPROC
+	bool "Sunxi remoteproc misc ops support"
+
+config AW_RPROC_RSC_HELPER
+	depends on AW_REMOTEPROC
+	bool "Sunxi remoteproc rsc helper support"
+
+config AW_RPROC_USER_RESOURCE
+	select AW_RPROC_MISC_OPS
+	depends on AW_RPROC_RSC_HELPER
+	bool "Sunxi remoteproc user resource handle support"
+
+endif

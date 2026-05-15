@@ -1,0 +1,5 @@
+config AW_TWI
+	bool "SUNXI TWI driver"
+	depends on I2C
+	help
+	  Support for SUNXI TWI controller.

@@ -1,0 +1,6 @@
+config AW_EFUSE
+	bool "Enable Allwinner sunxi efuse driver"
+	depends on MISC
+	help
+	  Enable support for reading and writing the efuse on the
+	  allwinner sunxi SoCs.

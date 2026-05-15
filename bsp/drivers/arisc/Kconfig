@@ -1,0 +1,13 @@
+config SUNXI_ARISC_EXIST
+	bool "support sunxi arisc"
+	default n
+
+config ARISC_DEASSERT_BEFORE_KERNEL
+	bool "sunxi arisc deassert before kernel"
+	default n
+
+config SUNXI_UBOOT_POWER_OFF
+	bool "Sunxi uboot power off"
+	default n
+	---help---
+	Select this to enable support for uboot power off

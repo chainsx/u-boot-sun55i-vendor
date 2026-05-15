@@ -1,0 +1,12 @@
+config BOOTCOUNT_RTC
+	bool "Sunxi boot counter in rtc register"
+	depends on BOOTCOUNT_LIMIT
+	help
+	  If BOOTCOUNT_RTC is set,"bootcount" will be saved in RTC register
+
+config SUNXI_BOOTCOUNT_RTC_INDEX
+	hex "Sunxi bootcount rtc index"
+	depends on BOOTCOUNT_RTC
+	default 0x5
+	help
+	  sunxi rtc GP_DATA_REGn, n = 0~7, default use 5

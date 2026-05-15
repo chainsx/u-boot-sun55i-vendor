@@ -1,0 +1,14 @@
+
+comment "SUNXI USB Host Controller Drivers"
+
+if USB_EHCI_HCD
+
+config USB_EHCI_HCD_SUNXI
+	bool "Allwinner EHCI HCD"
+	---help---
+	  This driver enables support for the internal USB Host Controllers
+	  found in Allwinner SoCs. The controllers are EHCI compliant.
+
+endif
+
+
