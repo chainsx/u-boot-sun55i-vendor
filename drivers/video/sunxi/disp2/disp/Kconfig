@@ -1,0 +1,17 @@
+config DISP2_SUNXI_SUPPORT_SMBL
+	bool "Support smart backlight"
+	default n
+	---help---
+		If you want to support smart backlight, select it.
+
+config DISP2_SUNXI_SUPPORT_ENAHNCE
+	bool "Support Video Enhance Process"
+	default n
+	---help---
+		If you want to support video enhance process, select it.
+
+config AW_DISP2_SET_CLK_BY_IC_VERSION
+       bool "set the de clock by the ic version"
+       default y
+       help
+               Select it to enable this feature.

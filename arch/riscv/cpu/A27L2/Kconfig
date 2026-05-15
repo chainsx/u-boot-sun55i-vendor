@@ -1,0 +1,9 @@
+config RISCV_NDS
+	bool "NDS riscv cpu"
+	help
+	  Run U-Boot on andes.
+
+config CPU_A27L2
+	bool "A27L2 riscv cpu"
+	help
+	  Run U-Boot on CPU A27L2 platforms .

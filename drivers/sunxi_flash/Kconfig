@@ -1,0 +1,20 @@
+menuconfig SUNXI_FLASH
+	bool "Sunxi flash support"
+
+if SUNXI_FLASH
+
+source "drivers/sunxi_flash/nand/Kconfig"
+source "drivers/sunxi_flash/spinor/Kconfig"
+source "drivers/sunxi_flash/mmc/Kconfig"
+source "drivers/sunxi_flash/ufs/Kconfig"
+
+
+endif
+
+config SUNXI_DUAL_STORAGE
+	bool "Support sunxi dual storage"
+	depends on SUNXI_FLASH
+	default n
+	help
+	  Enable support for sunxi dual storage, for example SPI-Nor + eMMC.
+	  This permits booting BOOT0/U-Boot from SPI-Nor flash, and loading kernel/rootfs from eMMC.
