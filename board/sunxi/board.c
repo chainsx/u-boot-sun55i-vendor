@@ -435,7 +435,16 @@ int g_dnl_board_usb_cable_connected(void)
 }
 #endif
 
+static void sunxi_mac_addr_inc(uint8_t *mac)
+{
+	mac[5]++;
+	if (mac[5] == 0)
+		mac[4]++;
 
+	/* Still locally administered + unicast */
+	mac[0] &= 0xfe;
+	mac[0] |= 0x02;
+}
 
 /*
  * Note this function gets called multiple times.
@@ -446,7 +455,9 @@ static void setup_environment(const void *fdt)
 #ifdef CONFIG_USB
 	__maybe_unused unsigned int sid[4];
 	__maybe_unused uint8_t mac_addr[6];
+	__maybe_unused uint8_t mac_addr1[6];
 	__maybe_unused char ethaddr[16];
+	__maybe_unused char ethaddr1[16];
 	__maybe_unused int  ret;
 
 
@@ -472,6 +483,7 @@ static void setup_environment(const void *fdt)
 			sid[3] |= 0x800000;
 
 		strcpy(ethaddr, "ethaddr");
+		strcpy(ethaddr1, "ethaddr1");
 
 		/* Non OUI / registered MAC address */
 		mac_addr[0] = (0 << 4) | 0x02;
@@ -482,6 +494,7 @@ static void setup_environment(const void *fdt)
 		mac_addr[5] = (sid[3] >>  0) & 0xff;
 
 		eth_env_set_enetaddr(ethaddr, mac_addr);
+		eth_env_set_enetaddr(ethaddr1, mac_addr1);
 
 	}
 #endif
