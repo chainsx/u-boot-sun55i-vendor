@@ -424,11 +424,133 @@ static void sunxi_mac_addr_inc(uint8_t *mac)
 	if (mac[5] == 0)
 		mac[4]++;
 
-	/* Still locally administered + unicast */
+	/* Keep the address locally administered and unicast. */
 	mac[0] &= 0xfe;
 	mac[0] |= 0x02;
 }
 
+/* Some vendor trees provide this helper, some do not.  Use it as a
+ * weak optional fallback because sunxi_get_sid() returns -ENODEV on A527 in
+ * this boot flow.
+ */
+extern int sunxi_get_soc_chipid(uint8_t *chipid) __attribute__((weak));
+
+static int sunxi_seed_is_valid(const uint32_t seed[4])
+{
+	return seed[0] || seed[1] || seed[2] || seed[3];
+}
+
+static void sunxi_dump_seed(const char *src, const uint32_t seed[4])
+{
+	printf("sunxi: ethernet mac seed from %s: %08x %08x %08x %08x\n",
+	       src, seed[0], seed[1], seed[2], seed[3]);
+}
+
+static int sunxi_get_eth_mac_seed(uint32_t seed[4], const char **src)
+{
+	unsigned int sid[4] = { 0 };
+	int ret;
+
+	memset(seed, 0, sizeof(uint32_t) * 4);
+
+	/* Preferred path: traditional sunxi SID.  It may return -ENODEV on A527. */
+	ret = sunxi_get_sid(sid);
+	if (!ret && (sid[0] || sid[1] || sid[2] || sid[3])) {
+		seed[0] = sid[0];
+		seed[1] = sid[1];
+		seed[2] = sid[2];
+		seed[3] = sid[3];
+		if (src)
+			*src = "sid";
+		return 0;
+	}
+	printf("sunxi: sunxi_get_sid failed for ethernet mac, ret=%d sid=%08x %08x %08x %08x\n",
+	       ret, sid[0], sid[1], sid[2], sid[3]);
+
+	/* Optional vendor/kernel-style helper.  Some Allwinner trees expose this. */
+	if (sunxi_get_soc_chipid) {
+		uint8_t chipid[16] = { 0 };
+
+		ret = sunxi_get_soc_chipid(chipid);
+		memcpy(seed, chipid, sizeof(uint32_t) * 4);
+		if (sunxi_seed_is_valid(seed)) {
+			if (src)
+				*src = "chipid";
+			return 0;
+		}
+		printf("sunxi: sunxi_get_soc_chipid failed for ethernet mac, ret=%d chipid=%08x %08x %08x %08x\n",
+		       ret, seed[0], seed[1], seed[2], seed[3]);
+	}
+
+#ifdef CONFIG_MMC
+	/* Last-resort stable fallback: boot-card CID.  This is stable for the
+	 * installed card/eMMC and avoids a random MAC on every reboot if SID access
+	 * is unavailable in U-Boot.
+	 */
+	{
+		struct mmc *mmc;
+		int dev = board_mmc_get_num();
+
+		mmc = find_mmc_device(dev);
+		if (!mmc)
+			mmc = find_mmc_device(0);
+
+		if (mmc) {
+			mmc_init(mmc);
+			seed[0] = mmc->cid[0];
+			seed[1] = mmc->cid[1];
+			seed[2] = mmc->cid[2];
+			seed[3] = mmc->cid[3];
+			if (sunxi_seed_is_valid(seed)) {
+				if (src)
+					*src = "mmc-cid";
+				return 0;
+			}
+		}
+	}
+#endif
+
+	return -ENODEV;
+}
+
+static int sunxi_generate_eth_mac(unsigned int index, uint8_t *mac)
+{
+	uint32_t seed[4];
+	uint32_t hash;
+	const char *src = "unknown";
+	int ret;
+
+	ret = sunxi_get_eth_mac_seed(seed, &src);
+	if (ret)
+		return ret;
+
+	sunxi_dump_seed(src, seed);
+
+	/* Derive a stable locally administered unicast MAC from the best available
+	 * unique seed.  This keeps eth0/eth1 deterministic and distinct.
+	 */
+	hash = crc32(0, (unsigned char *)seed, sizeof(seed));
+	if ((hash & 0xffffff) == 0)
+		hash |= 0x800000;
+
+	mac[0] = 0x02;
+	mac[1] = ((seed[0] >> 0) ^ (seed[1] >> 8) ^ (hash >> 24)) & 0xff;
+	mac[2] = (hash >> 24) & 0xff;
+	mac[3] = (hash >> 16) & 0xff;
+	mac[4] = (hash >> 8) & 0xff;
+	mac[5] = hash & 0xff;
+
+	while (index--)
+		sunxi_mac_addr_inc(mac);
+
+	return 0;
+}
+
+static void sunxi_print_mac(const char *tag, const uint8_t *mac)
+{
+	printf("%s %02x:%02x:%02x:%02x:%02x:%02x\n", tag,
+	       mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+}
 
 /*
  * Note this function gets called multiple times.
@@ -436,95 +558,121 @@ static void sunxi_mac_addr_inc(uint8_t *mac)
  */
 static void setup_environment(const void *fdt)
 {
-#ifdef CONFIG_USB
-	__maybe_unused unsigned int sid[4];
-	__maybe_unused uint8_t mac_addr[ARP_HLEN];
-	__maybe_unused uint8_t mac_addr1[ARP_HLEN];
-	__maybe_unused uint8_t env_mac[ARP_HLEN];
-	__maybe_unused int ret;
+	uint8_t mac_addr[ARP_HLEN];
+	uint8_t env_mac[ARP_HLEN];
 
 	(void)fdt;
 
-	ret = sunxi_get_sid(sid);
-	if (ret == 0 && sid[0] != 0) {
-		/*
-		 * The single words 1 - 3 of the SID have quite a few bits
-		 * which are the same on many models, so we take a crc32
-		 * of all 3 words, to get a more unique value.
-		 *
-		 * Note we only do this on newer SoCs as we cannot change
-		 * the algorithm on older SoCs since those have been using
-		 * fixed mac-addresses based on only using word 3 for a
-		 * long time and changing a fixed mac-address with an
-		 * u-boot update is not good.
-		 */
-		sid[3] = crc32(0, (unsigned char *)&sid[1], 12);
-
-		/* Ensure the NIC specific bytes of the mac are not all 0 */
-		if ((sid[3] & 0xffffff) == 0)
-			sid[3] |= 0x800000;
-
-		/* Non OUI / registered MAC address */
-		mac_addr[0] = 0x02;
-		mac_addr[1] = (sid[0] >> 0) & 0xff;
-		mac_addr[2] = (sid[3] >> 24) & 0xff;
-		mac_addr[3] = (sid[3] >> 16) & 0xff;
-		mac_addr[4] = (sid[3] >> 8) & 0xff;
-		mac_addr[5] = (sid[3] >> 0) & 0xff;
-
-		memcpy(mac_addr1, mac_addr, sizeof(mac_addr1));
-		sunxi_mac_addr_inc(mac_addr1);
-
-		if (!eth_env_get_enetaddr("ethaddr", env_mac))
+	if (!eth_env_get_enetaddr("ethaddr", env_mac)) {
+		if (!sunxi_generate_eth_mac(0, mac_addr)) {
 			eth_env_set_enetaddr("ethaddr", mac_addr);
-
-		/* U-Boot standard name for the second Ethernet port is eth1addr, not ethaddr1. */
-		if (!eth_env_get_enetaddr("eth1addr", env_mac))
-			eth_env_set_enetaddr("eth1addr", mac_addr1);
+			sunxi_print_mac("sunxi: generated ethaddr from SID", mac_addr);
+		}
 	}
-#endif
+
+	/* U-Boot standard name for the second Ethernet port is eth1addr. */
+	if (!eth_env_get_enetaddr("eth1addr", env_mac)) {
+		if (!sunxi_generate_eth_mac(1, mac_addr)) {
+			eth_env_set_enetaddr("eth1addr", mac_addr);
+			sunxi_print_mac("sunxi: generated eth1addr from SID", mac_addr);
+		}
+	}
 }
 
-static int sunxi_fdt_set_eth_mac(void *fdt, const char *alias, const char *env_name)
+static const char *sunxi_eth_alias_fallback_path(const char *alias)
+{
+	/* A527 dual Ethernet paths used by sun55i-a527-ahd-a527.dts. */
+	if (!strcmp(alias, "ethernet0"))
+		return "/soc@3000000/gmac0@4500000";
+	if (!strcmp(alias, "ethernet1"))
+		return "/soc@3000000/ethernet@4510000";
+
+	return NULL;
+}
+
+static int sunxi_fdt_set_eth_mac(void *fdt, const char *alias,
+				 const char *env_name, unsigned int index)
 {
 	const char *path;
 	unsigned char mac[ARP_HLEN];
 	int node;
 	int ret;
 
+	if (!fdt || fdt_check_header(fdt)) {
+		printf("sunxi: invalid fdt for %s mac fixup\n", alias);
+		return -1;
+	}
+
 	path = fdt_get_alias(fdt, alias);
+	if (!path)
+		path = sunxi_eth_alias_fallback_path(alias);
+
 	if (!path) {
 		printf("sunxi: no alias %s in kernel fdt\n", alias);
 		return -1;
 	}
 
-	if (!eth_env_get_enetaddr(env_name, mac)) {
-		printf("sunxi: no valid %s in env\n", env_name);
-		return -1;
+	/*
+	 * Prefer an explicitly configured environment MAC if present, but do not
+	 * depend on it.  In this vendor boot flow the environment may be loaded
+	 * without ethaddr/eth1addr, and relying on env caused Linux to receive no
+	 * mac-address/local-mac-address at all.
+	 */
+	if (eth_env_get_enetaddr(env_name, mac)) {
+		printf("sunxi: use %s from env\n", env_name);
+	} else {
+		ret = sunxi_generate_eth_mac(index, mac);
+		if (ret) {
+			printf("sunxi: cannot generate %s mac, ret=%d\n", alias, ret);
+			return ret;
+		}
+		printf("sunxi: no valid %s in env, use SID derived mac\n", env_name);
 	}
 
 	node = fdt_path_offset(fdt, path);
 	if (node < 0) {
-		printf("sunxi: alias %s path %s not found, ret=%d\n", alias, path, node);
+		printf("sunxi: alias %s path %s not found, ret=%d\n",
+		       alias, path, node);
 		return node;
 	}
 
 	ret = fdt_setprop(fdt, node, "mac-address", mac, sizeof(mac));
 	if (ret) {
-		printf("sunxi: set %s mac-address failed, ret=%d\n", alias, ret);
+		printf("sunxi: set %s mac-address failed, ret=%d\n",
+		       alias, ret);
 		return ret;
 	}
 
 	ret = fdt_setprop(fdt, node, "local-mac-address", mac, sizeof(mac));
 	if (ret) {
-		printf("sunxi: set %s local-mac-address failed, ret=%d\n", alias, ret);
+		printf("sunxi: set %s local-mac-address failed, ret=%d\n",
+		       alias, ret);
 		return ret;
 	}
 
 	printf("sunxi: set %s %s mac %02x:%02x:%02x:%02x:%02x:%02x\n",
-	       alias, path, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+	       alias, path, mac[0], mac[1], mac[2],
+	       mac[3], mac[4], mac[5]);
 
 	return 0;
+}
+
+static void sunxi_fdt_fixup_eth_macs(void *fdt)
+{
+	int ret;
+
+	if (!fdt || fdt_check_header(fdt)) {
+		printf("sunxi: skip ethernet mac fixup, invalid fdt\n");
+		return;
+	}
+
+	/* Add room for mac-address and local-mac-address properties. */
+	ret = fdt_increase_size(fdt, 512);
+	if (ret)
+		printf("sunxi: fdt increase size failed, ret=%d\n", ret);
+
+	sunxi_fdt_set_eth_mac(fdt, "ethernet0", "ethaddr", 0);
+	sunxi_fdt_set_eth_mac(fdt, "ethernet1", "eth1addr", 1);
 }
 
 int misc_init_r(void)
@@ -532,6 +680,13 @@ int misc_init_r(void)
 	__maybe_unused int ret;
 
 	setup_environment(gd->fdt_blob);
+
+	/*
+	 * This fixes U-Boot's own DTB copy. The final kernel DTB is still
+	 * fixed in ft_board_setup(). Keeping both paths makes the fix robust
+	 * against vendor boot flows that reuse gd->fdt_blob.
+	 */
+	sunxi_fdt_fixup_eth_macs((void *)gd->fdt_blob);
 
 #if 0
 	ret = sunxi_usb_phy_probe();
@@ -555,8 +710,7 @@ int ft_board_setup(void *blob, bd_t *bd)
 	setup_environment(blob);
 
 	/* Force MAC addresses into the final DTB passed to Linux. */
-	sunxi_fdt_set_eth_mac(blob, "ethernet0", "ethaddr");
-	sunxi_fdt_set_eth_mac(blob, "ethernet1", "eth1addr");
+	sunxi_fdt_fixup_eth_macs(blob);
 
 #ifdef CONFIG_VIDEO_DT_SIMPLEFB
 	r = sunxi_simplefb_setup(blob);
