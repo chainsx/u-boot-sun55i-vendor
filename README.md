@@ -1,7 +1,7 @@
 ### Compile
 
 ```
-make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- sun55iw3p1_t527_defconfig
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- sun55iw3_defconfig
 ```
 
 A527:

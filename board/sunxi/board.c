@@ -9,7 +9,6 @@
  *
  * Some board init for the Allwinner A10-evb board.
  */
-
 #include <common.h>
 #include <dm.h>
 #include <mmc.h>
@@ -55,23 +54,22 @@
 #include <mapmem.h>
 #include <smc.h>
 
-
-int  __attribute__((weak)) sunxi_set_sramc_mode(void)
+int __attribute__((weak)) sunxi_set_sramc_mode(void)
 {
 	return 0;
 }
 
-int  __attribute__((weak)) clock_set_corepll(int frequency)
+int __attribute__((weak)) clock_set_corepll(int frequency)
 {
 	return 0;
 }
 
-void  __attribute__((weak)) rtc_set_vccio_det_spare(void)
+void __attribute__((weak)) rtc_set_vccio_det_spare(void)
 {
-	return ;
+	return;
 }
 
-int  __attribute__((weak)) rtc_set_dcxo_off(void)
+int __attribute__((weak)) rtc_set_dcxo_off(void)
 {
 	return 0;
 }
@@ -83,19 +81,19 @@ __weak int sunxi_overlay_apply_merged(void *dtb_base, void *dtbo_base)
 {
 	return fdt_check_header(dtbo_base);
 }
-
 #endif
 
 void i2c_init_board(void)
 {
 	__maybe_unused char fdt_node_str[8] = {0};
+
 #ifdef CONFIG_I2C0_ENABLE
 #if defined(CONFIG_MACH_SUN8IW18)
-	#if 0 /*twi0 & uart0 use the same pin*/
+#if 0 /* twi0 & uart0 use the same pin */
 	sunxi_gpio_set_cfgpin(SUNXI_GPH(0), SUN8I_GPH_TWI0);
 	sunxi_gpio_set_cfgpin(SUNXI_GPH(1), SUN8I_GPH_TWI0);
-	clock_twi_onoff(0,1);
-	#endif
+	clock_twi_onoff(0, 1);
+#endif
 #else
 	sprintf(fdt_node_str, "twi0");
 	fdt_set_all_pin(fdt_node_str, "pinctrl-0");
@@ -106,7 +104,7 @@ void i2c_init_board(void)
 #if defined(CONFIG_MACH_SUN8IW18)
 	sunxi_gpio_set_cfgpin(SUNXI_GPH(2), SUN8I_GPH_TWI1);
 	sunxi_gpio_set_cfgpin(SUNXI_GPH(3), SUN8I_GPH_TWI1);
-	/*clock_twi_onoff(1, 1);*/
+	/* clock_twi_onoff(1, 1); */
 #else
 	sprintf(fdt_node_str, "twi1");
 	fdt_set_all_pin(fdt_node_str, "pinctrl-0");
@@ -153,45 +151,45 @@ void i2c_init_board(void)
 #endif
 #endif
 }
+
 #ifdef CONFIG_ARM
 void enable_smp(void)
 {
-   /* SMP status is controlled by bit 6 of the CP15 Aux Ctrl Reg:ACTLR */
-   asm volatile("MRC     p15, 0, r0, c1, c0, 1");
-   asm volatile("ORR     r0, r0, #0x040");
-   asm volatile("MCR     p15, 0, r0, c1, c0, 1");
+	/* SMP status is controlled by bit 6 of the CP15 Aux Ctrl Reg:ACTLR */
+	asm volatile("MRC p15, 0, r0, c1, c0, 1");
+	asm volatile("ORR r0, r0, #0x040");
+	asm volatile("MCR p15, 0, r0, c1, c0, 1");
 }
 #else
 void __attribute__((weak)) enable_smp(void)
 {
-	return ;
+	return;
 }
 #endif
+
 void smp_init(void)
 {
-    int cpu_status = 0;
+	int cpu_status = 0;
+
 #if defined(CONFIG_SUNXI_NCAT) || defined(CONFIG_SUNXI_NCAT_V2)
 #ifdef CONFIG_MACH_SUN300IW1
-    cpu_status = 1;
+	cpu_status = 1;
 #else
-    cpu_status = readl(IOMEM_ADDR(SUNXI_CPUXCFG_BASE + 0x80));
-    cpu_status &= (0xf<<24);
+	cpu_status = readl(IOMEM_ADDR(SUNXI_CPUXCFG_BASE + 0x80));
+	cpu_status &= (0xf << 24);
 #endif
 #else
-    /*old platform enable smp unconditionally*/
-    cpu_status = 1;
+	/* old platform enable smp unconditionally */
+	cpu_status = 1;
 #endif
-
-    /* note:
-          sbrom will enable smp bit when jmp to non-secure fel.
-          but normal brom not do this operation.
-          so should enable smp when run uboot by normal fel mode.
-      */
-    if(!cpu_status)
-        enable_smp();
-
+	/*
+	 * note: sbrom will enable smp bit when jmp to non-secure fel,
+	 * but normal brom not do this operation. so should enable smp
+	 * when run uboot by normal fel mode.
+	 */
+	if (!cpu_status)
+		enable_smp();
 }
-
 
 int sunxi_plat_init(void)
 {
@@ -199,9 +197,9 @@ int sunxi_plat_init(void)
 #ifdef CONFIG_SUNXI_DMA
 	sunxi_dma_init();
 #endif
-
 #ifdef CONFIG_ARM
 	extern int secure_os_memory_init(void);
+
 	if (sunxi_probe_secure_os()) {
 		smc_tee_inform_fdt((uint64_t)(unsigned long)working_fdt, gd->fdt_size);
 		secure_os_memory_init();
@@ -214,13 +212,13 @@ int sunxi_plat_init(void)
 int board_init(void)
 {
 	__maybe_unused int id_pfr1, ret, satapwr_pin, macpwr_pin;
+	int work_mode;
+	int boot_clock;
 
 	gd->bd->bi_boot_params = (PHYS_SDRAM_0 + 0x100);
-
 	sunxi_plat_init();
 
-	int work_mode = get_boot_work_mode();
-
+	work_mode = get_boot_work_mode();
 	ret = axp_gpio_init();
 	if (ret)
 		return ret;
@@ -228,45 +226,42 @@ int board_init(void)
 #ifdef CONFIG_SUNXI_BMU_EXT
 	bmu_ext_probe();
 #endif
-
 #ifdef CONFIG_SUNXI_POWER
 	axp_probe();
 #endif
-
 #ifdef CONFIG_SUNXI_PMU_EXT
 	if (!pmu_ext_probe()) {
 		pmu_ext_set_dcdc_mode();
 		pmu_ext_set_power_supply_output();
 	}
 #endif
-
 #ifdef CONFIG_SUNXI_PMU_GENERAL
 	pmu_general_probe();
 #endif
-
 	rtc_set_dcxo_off();
 
 	if ((work_mode == WORK_MODE_BOOT) ||
-		(work_mode == WORK_MODE_CARD_PRODUCT) ||
-		(work_mode == WORK_MODE_CARD_UPDATE))
+	    (work_mode == WORK_MODE_CARD_PRODUCT) ||
+	    (work_mode == WORK_MODE_CARD_UPDATE))
 		sunxi_set_sramc_mode();
-	int boot_clock;
-	script_parser_fetch(FDT_PATH_TARGET, "boot_clock", &boot_clock, uboot_spare_head.boot_data.run_clock);
+
+	script_parser_fetch(FDT_PATH_TARGET, "boot_clock", &boot_clock,
+			    uboot_spare_head.boot_data.run_clock);
 	clock_set_corepll(boot_clock);
-	/*fix reset circuit detection threshold*/
+
+	/* fix reset circuit detection threshold */
 	rtc_set_vccio_det_spare();
-	tick_printf("CPU=%d MHz,PLL6=%d Mhz,AHB=%d Mhz, APB1=%dMhz  MBus=%dMhz\n",
-		clock_get_corepll(),
-		clock_get_pll6(), clock_get_ahb(),
-		clock_get_apb1(),clock_get_mbus());
+	tick_printf("CPU=%d MHz,PLL6=%d Mhz,AHB=%d Mhz, APB1=%dMhz MBus=%dMhz\n",
+		    clock_get_corepll(), clock_get_pll6(), clock_get_ahb(),
+		    clock_get_apb1(), clock_get_mbus());
 
 #ifdef CONFIG_SUNXI_OVERLAY
-	if (get_boot_work_mode() != WORK_MODE_BOOT) {
+	if (get_boot_work_mode() != WORK_MODE_BOOT)
 		return 0;
-	}
+
 	if (!sunxi_overlay_apply_merged(working_fdt, gd->new_dtbo)) {
 		pr_err("sunxi overlay merged %sqv\n",
-			(fdt_overlay_apply_verbose(working_fdt, gd->new_dtbo) ? "fail":"ok"));
+		       (fdt_overlay_apply_verbose(working_fdt, gd->new_dtbo) ? "fail" : "ok"));
 	} else {
 		pr_msg("not need merged sunxi overlay\n");
 	}
@@ -278,40 +273,37 @@ int board_init(void)
 int dram_init(void)
 {
 	uint dram_size = 0;
+
 	dram_size = uboot_spare_head.boot_data.dram_scan_size;
-
 	dram_size = dram_size > 2048 ? 2048 : dram_size;
-
-	if(dram_size)
+	if (dram_size)
 		gd->ram_size = dram_size * 1024 * 1024;
 	else
 		gd->ram_size = get_ram_size((long *)PHYS_SDRAM_0, PHYS_SDRAM_0_SIZE);
 
 #ifdef CONFIG_ARM
 	ulong drm_base = 0, drm_size = 0;
+
 	if (sunxi_probe_secure_os()) {
 		if (!smc_tee_probe_drm_configure(&drm_base, &drm_size)) {
 			pr_msg("drm_base=0x%lx\n", drm_base);
 			pr_msg("drm_size=0x%lx\n", drm_size);
 			pr_msg("dram_base=0x%lx\n", CONFIG_SYS_SDRAM_BASE);
 			pr_msg("dram_size=0x%lx\n", gd->ram_size);
-			if (drm_base + drm_size ==
-			    CONFIG_SYS_SDRAM_BASE + gd->ram_size) {
-				//drm region resides in end of memory
-				//do not relocate to that area
+			if (drm_base + drm_size == CONFIG_SYS_SDRAM_BASE + gd->ram_size) {
+				/* drm region resides in end of memory, do not relocate to that area */
 				gd->ram_size -= drm_size;
 			}
 		}
 	}
 #endif
-
 	return 0;
 }
 
 #ifdef CONFIG_MMC
 static void mmc_pinmux_setup(int sdc)
 {
-	#if 0
+#if 0
 	unsigned int pin;
 	__maybe_unused int pins;
 
@@ -324,10 +316,8 @@ static void mmc_pinmux_setup(int sdc)
 			sunxi_gpio_set_drv(pin, 2);
 		}
 		break;
-
 	case 2:
 		pins = sunxi_name_to_gpio_bank(CONFIG_MMC2_PINS);
-
 #if defined(CONFIG_MACH_SUN50IW6)
 		/* SDC2: PC4-PC14 */
 		for (pin = SUNXI_GPC(4); pin <= SUNXI_GPC(14); pin++) {
@@ -337,44 +327,39 @@ static void mmc_pinmux_setup(int sdc)
 		}
 #endif
 		break;
-
 	default:
 		printf("sunxi: invalid MMC slot %d for pinmux setup\n", sdc);
 		break;
 	}
-	#endif
+#endif
 }
 
 /*
-
 int board_mmc_init(bd_t *bis)
 {
-    sunxi_mmc_init(bis->bi_card_num);
-
-    return 0;
+	sunxi_mmc_init(bis->bi_card_num);
+	return 0;
 }
 */
+
 void board_mmc_pre_init(int card_num)
 {
-    bd_t *bd;
+	bd_t *bd;
 
-    bd = gd->bd;
-    //gd->bd->bi_card_num = card_num;
-    mmc_initialize(bd);
-
+	bd = gd->bd;
+	/* gd->bd->bi_card_num = card_num; */
+	mmc_initialize(bd);
 }
 
 int board_mmc_get_num(void)
 {
-    return gd->boot_card_num;
+	return gd->boot_card_num;
 }
-
 
 void board_mmc_set_num(int num)
 {
-    gd->boot_card_num = num;
+	gd->boot_card_num = num;
 }
-
 
 int board_mmc_init(bd_t *bis)
 {
@@ -385,6 +370,7 @@ int board_mmc_init(bd_t *bis)
 	mmc0 = sunxi_mmc_init(board_mmc_get_num());
 	if (!mmc0)
 		return -1;
+
 #if 0
 #if CONFIG_MMC_SUNXI_SLOT_EXTRA != -1
 	mmc_pinmux_setup(CONFIG_MMC_SUNXI_SLOT_EXTRA);
@@ -393,12 +379,9 @@ int board_mmc_init(bd_t *bis)
 		return -1;
 #endif
 #endif
-
 	return 0;
 }
 #endif
-
-
 
 #ifdef CONFIG_USB_GADGET
 int g_dnl_board_usb_cable_connected(void)
@@ -446,6 +429,7 @@ static void sunxi_mac_addr_inc(uint8_t *mac)
 	mac[0] |= 0x02;
 }
 
+
 /*
  * Note this function gets called multiple times.
  * It must not make any changes to env variables which already exist.
@@ -454,12 +438,12 @@ static void setup_environment(const void *fdt)
 {
 #ifdef CONFIG_USB
 	__maybe_unused unsigned int sid[4];
-	__maybe_unused uint8_t mac_addr[6];
-	__maybe_unused uint8_t mac_addr1[6];
-	__maybe_unused char ethaddr[16];
-	__maybe_unused char ethaddr1[16];
-	__maybe_unused int  ret;
+	__maybe_unused uint8_t mac_addr[ARP_HLEN];
+	__maybe_unused uint8_t mac_addr1[ARP_HLEN];
+	__maybe_unused uint8_t env_mac[ARP_HLEN];
+	__maybe_unused int ret;
 
+	(void)fdt;
 
 	ret = sunxi_get_sid(sid);
 	if (ret == 0 && sid[0] != 0) {
@@ -474,30 +458,73 @@ static void setup_environment(const void *fdt)
 		 * long time and changing a fixed mac-address with an
 		 * u-boot update is not good.
 		 */
-
 		sid[3] = crc32(0, (unsigned char *)&sid[1], 12);
-
 
 		/* Ensure the NIC specific bytes of the mac are not all 0 */
 		if ((sid[3] & 0xffffff) == 0)
 			sid[3] |= 0x800000;
 
-		strcpy(ethaddr, "ethaddr");
-		strcpy(ethaddr1, "ethaddr1");
-
 		/* Non OUI / registered MAC address */
-		mac_addr[0] = (0 << 4) | 0x02;
-		mac_addr[1] = (sid[0] >>  0) & 0xff;
+		mac_addr[0] = 0x02;
+		mac_addr[1] = (sid[0] >> 0) & 0xff;
 		mac_addr[2] = (sid[3] >> 24) & 0xff;
 		mac_addr[3] = (sid[3] >> 16) & 0xff;
-		mac_addr[4] = (sid[3] >>  8) & 0xff;
-		mac_addr[5] = (sid[3] >>  0) & 0xff;
+		mac_addr[4] = (sid[3] >> 8) & 0xff;
+		mac_addr[5] = (sid[3] >> 0) & 0xff;
 
-		eth_env_set_enetaddr(ethaddr, mac_addr);
-		eth_env_set_enetaddr(ethaddr1, mac_addr1);
+		memcpy(mac_addr1, mac_addr, sizeof(mac_addr1));
+		sunxi_mac_addr_inc(mac_addr1);
 
+		if (!eth_env_get_enetaddr("ethaddr", env_mac))
+			eth_env_set_enetaddr("ethaddr", mac_addr);
+
+		/* U-Boot standard name for the second Ethernet port is eth1addr, not ethaddr1. */
+		if (!eth_env_get_enetaddr("eth1addr", env_mac))
+			eth_env_set_enetaddr("eth1addr", mac_addr1);
 	}
 #endif
+}
+
+static int sunxi_fdt_set_eth_mac(void *fdt, const char *alias, const char *env_name)
+{
+	const char *path;
+	unsigned char mac[ARP_HLEN];
+	int node;
+	int ret;
+
+	path = fdt_get_alias(fdt, alias);
+	if (!path) {
+		printf("sunxi: no alias %s in kernel fdt\n", alias);
+		return -1;
+	}
+
+	if (!eth_env_get_enetaddr(env_name, mac)) {
+		printf("sunxi: no valid %s in env\n", env_name);
+		return -1;
+	}
+
+	node = fdt_path_offset(fdt, path);
+	if (node < 0) {
+		printf("sunxi: alias %s path %s not found, ret=%d\n", alias, path, node);
+		return node;
+	}
+
+	ret = fdt_setprop(fdt, node, "mac-address", mac, sizeof(mac));
+	if (ret) {
+		printf("sunxi: set %s mac-address failed, ret=%d\n", alias, ret);
+		return ret;
+	}
+
+	ret = fdt_setprop(fdt, node, "local-mac-address", mac, sizeof(mac));
+	if (ret) {
+		printf("sunxi: set %s local-mac-address failed, ret=%d\n", alias, ret);
+		return ret;
+	}
+
+	printf("sunxi: set %s %s mac %02x:%02x:%02x:%02x:%02x:%02x\n",
+	       alias, path, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+
+	return 0;
 }
 
 int misc_init_r(void)
@@ -505,16 +532,15 @@ int misc_init_r(void)
 	__maybe_unused int ret;
 
 	setup_environment(gd->fdt_blob);
+
 #if 0
 	ret = sunxi_usb_phy_probe();
 	if (ret)
 		return ret;
 #endif
-
 #ifdef CONFIG_USB_ETHER
 	usb_ether_init();
 #endif
-
 	return 0;
 }
 
@@ -527,6 +553,10 @@ int ft_board_setup(void *blob, bd_t *bd)
 	 * ethernet aliases the u-boot copy does not have.
 	 */
 	setup_environment(blob);
+
+	/* Force MAC addresses into the final DTB passed to Linux. */
+	sunxi_fdt_set_eth_mac(blob, "ethernet0", "ethaddr");
+	sunxi_fdt_set_eth_mac(blob, "ethernet1", "eth1addr");
 
 #ifdef CONFIG_VIDEO_DT_SIMPLEFB
 	r = sunxi_simplefb_setup(blob);
@@ -549,15 +579,17 @@ static int reserve_bootlogo(void)
 		debug("no boot mode, dont read bootlogo\n");
 		return 0;
 	}
-	if (((uboot_spare_head.boot_data.func_mask &
-	      UBOOT_FUNC_MASK_BIT_BOOTLOGO) != UBOOT_FUNC_MASK_BIT_BOOTLOGO) ||
-	    (*compressed_logo_size == 0)) {
+
+	if (((uboot_spare_head.boot_data.func_mask & UBOOT_FUNC_MASK_BIT_BOOTLOGO) !=
+	     UBOOT_FUNC_MASK_BIT_BOOTLOGO) || (*compressed_logo_size == 0)) {
 		debug("no bootlogo from boot_package\n");
 		return 0;
 	}
+
 	gd->start_addr_sp -= ALIGN(*compressed_logo_size, 16);
 	gd->boot_logo_addr =
 		(ulong)map_sysmem(gd->start_addr_sp, *compressed_logo_size);
+
 	/* reserve logo_buf size addr */
 	gd->start_addr_sp -= 16;
 	*(uint *)(gd->boot_logo_addr - 16) = *compressed_logo_size;
