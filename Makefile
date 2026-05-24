@@ -393,7 +393,7 @@ PERL		= perl
 PYTHON		?= python
 PYTHON2		= python2
 PYTHON3		= python3
-DTC		?= $(objtree)/scripts/dtc/dtc
+DTC		?= dtc
 CHECK		= sparse
 
 CHECKFLAGS     := -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ \
