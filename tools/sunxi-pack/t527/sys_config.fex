@@ -118,13 +118,13 @@ dram_mr17      = 0x0
 dram_mr22      = 0x26
 dram_tpr0      = 0x80808080
 dram_tpr1      = 0x06060606
-dram_tpr2      = 0x1f090503
+dram_tpr2      = 0x0
 dram_tpr3      = 0x74000000
 dram_tpr6      = 0x38000000
 dram_tpr10     = 0x802f3333
 dram_tpr11     = 0xc7c5c4c2
 dram_tpr12     = 0x3533302f
-dram_tpr13     = 0x00000c64
+dram_tpr13     = 0x00000c60
 dram_tpr14     = 0x48484848
 
 [dram_para1]

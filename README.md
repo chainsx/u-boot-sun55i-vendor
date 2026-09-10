@@ -4,6 +4,12 @@
 make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- sun55iw3_defconfig
 ```
 
+T527:
+
+```
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- boot-package-t527 -j$(nproc)
+```
+
 A527:
 
 ```

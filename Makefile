@@ -1047,6 +1047,21 @@ SUNXI_SCRIPT := $(srctree)/tools/sunxi-pack/script
 SUNXI_UPDATE_UBOOT := $(srctree)/tools/sunxi-pack/update_uboot
 SUNXI_DRAGONSECBOOT := $(srctree)/tools/sunxi-pack/dragonsecboot
 
+boot-package-t527: u-boot.bin
+	$(info Prepare sunxi uboot files ...)
+	$(shell rm -f u-boot.fex boot_package.fex boot_package.cfg sys_config.bin sys_config.fex monitor.fex scp.fex boot0_sdcard.fex > /dev/null)
+	$(shell cp u-boot.bin u-boot.fex)
+	$(shell cp ./tools/sunxi-pack/t527/sys_config.fex .)
+	$(shell cp ./tools/sunxi-pack/t527/boot0_sdcard.fex .)
+	$(shell cp ./tools/sunxi-pack/t527/sunxi.fex .)
+	$(shell cp ./tools/sunxi-pack/t527/monitor.fex .)
+	$(shell cp ./tools/sunxi-pack/t527/scp.fex .)
+	$(shell cp ./tools/sunxi-pack/boot_package.cfg .)
+	$(info Pack sunxi uboot ...)
+	$(SUNXI_SCRIPT) sys_config.fex
+	$(SUNXI_UPDATE_UBOOT) -no_merge u-boot.fex sys_config.bin
+	$(SUNXI_DRAGONSECBOOT) -pack boot_package.cfg
+
 boot-package-a527: u-boot.bin
 	$(info Prepare sunxi uboot files ...)
 	$(shell rm -f u-boot.fex boot_package.fex boot_package.cfg sys_config.bin sys_config.fex monitor.fex scp.fex boot0_sdcard.fex > /dev/null)
@@ -1197,7 +1212,7 @@ MKIMAGEFLAGS_u-boot-ivt.img = -A $(ARCH) -T firmware_ivt -C none -O u-boot \
 	-a $(CONFIG_SYS_TEXT_BASE) -e $(CONFIG_SYS_UBOOT_START) \
 	-n "U-Boot $(UBOOTRELEASE) for $(BOARD) board"
 u-boot-ivt.img: MKIMAGEOUTPUT = u-boot-ivt.img.log
-CLEAN_FILES += u-boot-ivt.img.log u-boot-dtb.imx.log SPL.log u-boot.imx.log
+CLEAN_FILES += u-boot-ivt.img.log u-boot-dtb.imx.log SPL.log u-boot.imx.log *.fex sys_config.bin
 endif
 
 MKIMAGEFLAGS_u-boot-dtb.img = $(MKIMAGEFLAGS_u-boot.img)
@@ -1569,16 +1584,16 @@ define filechk_version.h
 	echo \#define LD_VERSION_STRING \"$$(LC_ALL=C $(LD) --version | head -n 1)\"; )
 endef
 
-DIRTY:=$(shell echo `git describe --dirty|grep -o dirty$$`)
-DEF_DOT_CONFIG_HASH=$(shell echo `cat .tmp_config_from_defconfig.o.md5sum`)
-CUR_DOT_CONFIG_HASH=$(shell echo `md5sum .config| awk '{printf $$1}'`)
-CONFIG_DIRTY:=$(shell if [ $(DEF_DOT_CONFIG_HASH) = $(CUR_DOT_CONFIG_HASH) ]; \
-	then echo ""; \
-	else echo "-config-dirty"; \
-	fi)
-ifeq ($(DIRTY)$(CONFIG_DIRTY),)
-	export SOURCE_DATE_EPOCH=$(shell echo `git log -1 --pretty=%ct`)
-endif
+#DIRTY:=$(shell echo `git describe --dirty|grep -o dirty$$`)
+#DEF_DOT_CONFIG_HASH=$(shell echo `cat .tmp_config_from_defconfig.o.md5sum`)
+#CUR_DOT_CONFIG_HASH=$(shell echo `md5sum .config| awk '{printf $$1}'`)
+#CONFIG_DIRTY:=$(shell if [ $(DEF_DOT_CONFIG_HASH) = $(CUR_DOT_CONFIG_HASH) ]; \
+#	then echo ""; \
+#	else echo "-config-dirty"; \
+#	fi)
+#ifeq ($(DIRTY)$(CONFIG_DIRTY),)
+#	export SOURCE_DATE_EPOCH=$(shell echo `git log -1 --pretty=%ct`)
+#endif
 
 
 # The SOURCE_DATE_EPOCH mechanism requires a date that behaves like GNU date.
